@@ -1,0 +1,8 @@
+__pycache__/
+.env
+.venv/
+storage/
+storage/submissons/
+app/logs/app.log
+*.pyc
+.pytest_cache/
