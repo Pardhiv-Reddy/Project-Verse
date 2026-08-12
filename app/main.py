@@ -4,6 +4,7 @@ from app.DB.db import db
 import app.routes.auth as auth
 import app.routes.faculty as faculty
 import app.routes.student as student
+from fastapi.middleware.cors import CORSMiddleware
 @asynccontextmanager
 async def lifespan(app:FastAPI):
     await db.connect()
@@ -13,3 +14,13 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(auth.router)
 app.include_router(faculty.router)
 app.include_router(student.router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
