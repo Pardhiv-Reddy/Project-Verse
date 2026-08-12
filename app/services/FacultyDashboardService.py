@@ -22,6 +22,8 @@ class FacultyDashboardService:
             designation=faculty["designation"]
         )
         teams = await self.projrepo.get_supervisor_teams(details.id,details.dept)
+        if teams is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Teams Are Not Found.")
         final_teams = [TeamSummary(team_id=team["team_id"],project_type=team["project_type"],academic_year=team["academic_year"]) for team in teams]
         return FacultyDashboard(faculty=details,teams=final_teams)
     async def get_team_detail(self,faculty_id:int,team_id:str):
