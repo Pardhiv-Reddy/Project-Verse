@@ -9,3 +9,4 @@ class Settings:
         self.skey = os.getenv("SECRET_KEY")
         self.alg = os.getenv("ALGORITHM")
         self.etime = int(os.getenv("EXPIRATION_TIME"))
+        self.github_token = os.getenv("GITHUB_TOKEN")
