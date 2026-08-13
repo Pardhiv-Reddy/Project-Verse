@@ -1,6 +1,6 @@
 from github import Auth
 from github import Github
-from config import GITHUB_TOKEN
+from settings import Settings
 from urllib.parse import urlparse
 from datetime import datetime,timezone
 from github.GithubException import UnknownObjectException
@@ -12,9 +12,11 @@ from models.github import Repository
 from models.github import Snapshot
 from models.github import Analytics
 
+setting = Settings()
+
 class GitHubService:
     def __init__(self):
-        auth = Auth.Token(GITHUB_TOKEN)
+        auth = Auth.Token(setting.github_token)
         self.client = Github(auth=auth,per_page=100)
 
     def extract_owner_repo(self,repo_url: str) -> tuple[str, str]:
