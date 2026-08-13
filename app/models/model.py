@@ -1,4 +1,4 @@
-from pydantic import BaseModel,field_validator,computed_field,model_validator
+from pydantic import BaseModel,computed_field,model_validator
 from enum import Enum
 from datetime import datetime
 class Person(BaseModel):
