@@ -188,6 +188,3 @@ class GitHubService:
             issues=issues,
             contributors=contributors,
         )
-
-    def build_analytics(self,snapshot: Snapshot)->Analytics:
-        pass
