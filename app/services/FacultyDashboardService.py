@@ -55,3 +55,31 @@ class FacultyDashboardService:
                 data["status"] = "NOT_SUBMITTED"
             result.append(data)
         return result
+    async def get_team_page(self,faculty_id:int,team_id:str):
+        if not await self.projrepo.verify_team(team_id, faculty_id):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="You are allowed only to view the details of the team you supervise.")
+        team = await self.projrepo.get_team(team_id)
+        if team is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Team not found.")
+        faculty = await self.frepo.get_faculty_by_id(faculty_id)
+        faculty_details = SupervisorDetails(id=faculty["eid"],name=faculty["name"])
+        team_details = TeamSummary(team_id=team["team_id"],project_type=team["project_type"],academic_year=team["academic_year"])
+        ids = await self.tmrepo.get_students(team_id)
+        members = []
+        for index, item in enumerate(ids):
+            student = await self.sturepo.get_details(item["student_id"])
+            members.append(
+                TeamMemberDetails(roll=student["roll"],name=student["name"],team_lead=(index == 0)))
+        rows = await self.srepo.get_team_submission_summary(team_id,team["dept"],team["project_type"])
+        submissions = []
+        for row in rows:
+            data = dict(row)
+            if data["submission_id"] is None:
+                data["status"] = "NOT_SUBMITTED"
+            submissions.append(data)
+        return {
+            "team": team_details,
+            "supervisor": faculty_details,
+            "members": members,
+            "submissions": submissions
+        }
