@@ -11,13 +11,15 @@ from models.github import PullRequest
 from models.github import Repository
 from models.github import Snapshot
 from models.github import Analytics
+from app.DB.repositories.projectgithubrepo import ProjectRepositoryRepo
 
 setting = Settings()
 
 class GitHubService:
-    def __init__(self):
+    def __init__(self,github_repo:ProjectRepositoryRepo):
         auth = Auth.Token(setting.github_token)
         self.client = Github(auth=auth,per_page=100)
+        self.github_repo = github_repo
 
     def extract_owner_repo(self,repo_url: str) -> tuple[str, str]:
         parsed = urlparse(repo_url)
@@ -38,19 +40,16 @@ class GitHubService:
 
         if repo_name.endswith(".git"):
             repo_name = repo_name[:-4]
-
         return owner, repo_name
     
-
-    def get_repository(self, repo_url: str):
-        owner, repo_name = self.extract_owner_repo(repo_url)
-
+    async def get_repository(self,repo_url: str):
+        owner,name = await self.extract_owner_repo(repo_url)
         try:    
-            return self.client.get_repo(f"{owner}/{repo_name}")
+            return self.client.get_repo(f"{owner}/{name}")
         except UnknownObjectException:
             raise ValueError(f"Repository not found: {repo_url}")
 
-    def get_readme(self,github_repo) -> str | None:
+    async def get_readme(self,github_repo) -> str | None:
         try:
             readme = github_repo.get_readme()
             return readme.decoded_content.decode("utf-8")
@@ -58,14 +57,14 @@ class GitHubService:
         except Exception:
             return None
 
-    def get_rate_limit(self):
+    async def get_rate_limit(self):
         return self.client.get_rate_limit()
 
-    def build_repository(self,repo_url: str)->Repository:
-        github_repo = self.get_repository(repo_url)
+    async def build_repository(self,id:int,repo_url: str)->Repository:
+        github_repo = await self.get_repository(repo_url)
 
         return Repository(
-            github_repo_id=github_repo.id,
+            github_repo_id=id,
             owner=github_repo.owner.login,
             name=github_repo.name,
             url=github_repo.html_url,
@@ -75,7 +74,7 @@ class GitHubService:
             registered_at=datetime.now(timezone.utc)
             )
 
-    def build_commit(self,github_commit) -> Commit:
+    async def build_commit(self,github_commit) -> Commit:
         author = (github_commit.author.login if github_commit.author else github_commit.commit.author.name)
 
         return Commit(
@@ -89,31 +88,31 @@ class GitHubService:
             )
 
     
-    def get_commits(self, repo_url: str,since:datetime,until:datetime) -> list[Commit]:
+    async def get_commits(self, repo_url: str,since:datetime,until:datetime) -> list[Commit]:
         github_repo=self.get_repository(repo_url)
         commits =[]
         github_commits = github_repo.get_commits(since=since,until=until)
 
         for github_commit in github_commits:
-            commits.append(self.build_commit(github_commit))
+            commits.append(await self.build_commit(github_commit))
 
         return commits
 
-    def build_contributor(self,github_contributor) -> Contributor:
+    async def build_contributor(self,github_contributor) -> Contributor:
         return Contributor(username=github_contributor.login,contributions=github_contributor.contributions)
     
         
-    def get_contributors(self, repo_url: str) -> list[Contributor]:
+    async def get_contributors(self, repo_url: str) -> list[Contributor]:
         github_repo = self.get_repository(repo_url)
         contributors=[]
         github_contributors=(github_repo.get_contributors())
 
         for github_contributor in github_contributors:
-            contributors.append(self.build_contributor(github_contributor))
+            contributors.append(await self.build_contributor(github_contributor))
 
         return contributors
 
-    def build_pull_request(self,github_pr) -> PullRequest:
+    async def build_pull_request(self,github_pr) -> PullRequest:
         author = (github_pr.user.login if github_pr.user else "Unknown")
 
         return PullRequest(
@@ -126,7 +125,7 @@ class GitHubService:
             merged_at=(github_pr.merged_at.astimezone(timezone.utc) if github_pr.merged_at else None)
             )
      
-    def get_pull_requests(self, repo_url: str,since:datetime,until:datetime) -> list[PullRequest]:
+    async def get_pull_requests(self, repo_url: str,since:datetime,until:datetime) -> list[PullRequest]:
         github_repo = self.get_repository(repo_url)
         pull_requests=[]
         github_prs=github_repo.get_pulls(state="all",sort="created",direction="desc")
@@ -138,11 +137,11 @@ class GitHubService:
                 break
 
             if since<=created_at<=until:
-                pull_requests.append(self.build_pull_request(github_pr))
+                pull_requests.append(await self.build_pull_request(github_pr))
 
         return pull_requests
 
-    def build_issue(self,github_issue) -> Issue:
+    async def build_issue(self,github_issue) -> Issue:
         author = (github_issue.user.login if github_issue.user else "Unknown")
 
         return Issue(
@@ -155,7 +154,7 @@ class GitHubService:
             closed_at=(github_issue.closed_at.astimezone(timezone.utc) if github_issue.closed_at else None)
             )
 
-    def get_issues(self, repo_url: str,since:datetime,until:datetime) -> list[Issue]:
+    async def get_issues(self, repo_url: str,since:datetime,until:datetime) -> list[Issue]:
         github_repo = self.get_repository(repo_url)
         issues=[]
         github_issues=github_repo.get_issues(state="all")
@@ -170,16 +169,16 @@ class GitHubService:
                 break
 
             if since<=created_at <=until:
-                issues.append(self.build_issue(github_issue))
+                issues.append(await self.build_issue(github_issue))
 
         return issues
 
 
-    def build_snapshot(self,repository:Repository,period_start:datetime,period_end:datetime) -> Snapshot:
-        commits=self.get_commits(str(repository.url),period_start,period_end)
-        contributors=self.get_contributors(str(repository.url))
-        pull_requests=self.get_pull_requests(str(repository.url),period_start,period_end)
-        issues=self.get_issues(str(repository.url),period_start,period_end)
+    async def build_snapshot(self,repository:Repository,period_start:datetime,period_end:datetime) -> Snapshot:
+        commits= await self.get_commits(str(repository.url),period_start,period_end)
+        contributors=await self.get_contributors(str(repository.url))
+        pull_requests=await self.get_pull_requests(str(repository.url),period_start,period_end)
+        issues=await self.get_issues(str(repository.url),period_start,period_end)
         return Snapshot(
             repository_id=repository.github_repo_id,
             period_start=period_start,
@@ -190,6 +189,3 @@ class GitHubService:
             issues=issues,
             contributors=contributors,
         )
-
-    def build_analytics(self,snapshot: Snapshot)->Analytics:
-        pass
