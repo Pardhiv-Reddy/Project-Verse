@@ -90,7 +90,16 @@ class ProjectWorkSpaceService:
                     else "NOT_SUBMITTED"
                     ),
                 "document_name": row["document_name"],
-                "submitted_at": row["submitted_at"]
+                "submitted_at": row["submitted_at"],
+                "review": (
+                    {
+                        "status": row["review_status"],
+                        "remarks": row["review_remarks"],
+                        "reviewed_at": row["reviewed_at"]
+                    }
+                    if row["review_status"] is not None
+                    else None
+                    )
                 }
                 for row in submissions
             ],

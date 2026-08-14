@@ -13,7 +13,8 @@ async def student_dashboard(student=Depends(get_current_student),service: Studen
     return await service.get_dashboard(student)
 @router.post("/teams/{team_id}/submission/{requirement_id}")
 async def Submit(team_id:str,requirement_id:int,file : UploadFile = File(...),service : SubmissionService = Depends(get_submission_service),student = Depends(get_team_lead)):
-    await service.submit_requirement(team_id,requirement_id,student,file)
+    await service.submit_requirement(team_id,requirement_id,file)
+    return {"Message":"Successfully Submitted."}
 @router.post("/teams/{team_id}/github")
 async def connect_github(team_id:str,req:GitHubRepositoryRequest,student_id=Depends(get_team_lead),service:GitHubRepositoryService = Depends(get_github_service)):
     repository = await service.connect_repository(team_id,student_id,str(req.repository_url))
@@ -36,7 +37,7 @@ async def get_github_repository(team_id: str,student_id=Depends(get_current_stud
         "repository_name": repository["repository_name"],
         "connected_at": repository["connected_at"]
     }
-@router.get("/teams/{team_id}/project")
+@router.get("/teams/{team_id}")
 async def project_workspace(team_id: str,student_id=Depends(get_current_student),service: ProjectWorkSpaceService = Depends(get_project_workspace_dashboard_service)):
     return await service.get_project_page(team_id,student_id)
 @router.get("/notifications")
