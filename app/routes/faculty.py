@@ -45,7 +45,7 @@ async def faculty_dashboard(faculty=Depends(get_current_faculty),service: Facult
     return await service.get_dashboard(faculty["id"])
 @router.get("/teams/{team_id}")
 async def get_team_details(team_id:str,faculty=Depends(get_current_faculty),service : FacultyDashboardService = Depends(get_faculty_dashboard_service)):
-    return await service.get_team_detail(faculty["id"],team_id)
+    return await service.get_team_page(faculty["id"],team_id)
 @router.get("/teams/{team_id}/submissions")
 async def view_submissions(team_id:str,service : SubmissionService = Depends(get_submission_service),faculty = Depends(get_current_faculty)):
     return await service.view_team_submissions(team_id,faculty["id"])
