@@ -2,16 +2,25 @@ from pydantic import BaseModel,Field,HttpUrl
 from datetime import datetime
 
 class Analytics(BaseModel):
-    total_commits: int
-    total_contributors: int
-    open_issues: int
-    closed_issues: int
-    open_prs: int
-    merged_prs: int
-    last_activity: datetime | None
-    contribution_breakdown: dict[str, int]
-    activity_score: float
-    activity_level: float
+    period_start:datetime
+    period_end:datetime
+    total_commits: int=0
+    total_contributors: int=0
+    total_additions:int=0
+    total_deletions:int=0
+    open_issues: int=0
+    closed_issues: int=0
+    open_prs: int=0
+    merged_prs: int=0
+    last_activity: datetime | None=None
+    contribution_breakdown: dict[str, int]=Field(default_factory=dict)
+    contribution_percentages: dict[str, float] = Field(default_factory=dict)
+    commit_messages: list[str] = Field(default_factory=list)
+    active_contributors: int = 0
+    top_contributors: list[tuple[str, int]] = Field(default_factory=list)
+    period_days: int = 0
+    changed_files: list[str] = Field(default_factory=list)
+
 
 class Commit(BaseModel):
     sha :str
