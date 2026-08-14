@@ -1,16 +1,16 @@
 from github import Auth
 from github import Github
-from settings import Settings
+from ..settings import Settings
 from urllib.parse import urlparse
 from datetime import datetime,timezone
 from github.GithubException import UnknownObjectException
-from models.github import Commit
-from models.github import Contributor
-from models.github import Issue
-from models.github import PullRequest
-from models.github import Repository
-from models.github import Snapshot
-from models.github import Analytics
+from ..models.github import Commit
+from ..models.github import Contributor
+from ..models.github import Issue
+from ..models.github import PullRequest
+from ..models.github import Repository
+from ..models.github import Snapshot
+from ..models.github import Analytics
 from app.DB.repositories.projectgithubrepo import ProjectRepositoryRepo
 
 setting = Settings()

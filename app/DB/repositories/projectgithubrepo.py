@@ -9,4 +9,4 @@ class ProjectRepositoryRepo:
     async def get_owner_repo_name(self,team_id:str):
         return await self.conn.fetchrow("Select repository_owner,repository_name from project_repositories where team_id = $1",team_id)
     async def get_repositories_due_for_snapshot(self):
-        return await self.conn.fetch("select pr.id,pr.repository_url,pr.repository_owner,pr.repository_name,pr.connected_at from project_repositories pr left join lateral (select captured_at from github_snapshots where repository_id = pr.id order by captured_at desc limit 1) s on true where s.captured_at is null or s.captured_at <= NOW() - INTERVAL '20 days'")
+        return await self.conn.fetchrow("select pr.id,pr.repository_url,pr.repository_owner,pr.repository_name,pr.connected_at from project_repositories pr left join lateral (select captured_at from github_snapshots where repository_id = pr.id order by captured_at desc limit 1) s on true where s.captured_at is null or s.captured_at <= NOW() - INTERVAL '20 days'")

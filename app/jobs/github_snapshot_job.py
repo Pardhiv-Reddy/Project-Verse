@@ -14,6 +14,8 @@ async def run():
             github_service = GitHubService(project_repo)
             snapshot_service = SnapshotService(snapshot_repo=snapshot_repo,github_service=github_service)
             repositories = await project_repo.get_repositories_due_for_snapshot()
+            if repositories is None:
+                 return
             for repository in repositories:
                     rep = github_service.build_repository(repository["id"],repository["repository__url"])
                     await snapshot_service.capture_snapshot(rep)
