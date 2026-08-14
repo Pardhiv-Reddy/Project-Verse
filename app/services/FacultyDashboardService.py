@@ -37,9 +37,9 @@ class FacultyDashboardService:
         faculty_details = SupervisorDetails(id=faculty["eid"],name=faculty["name"])
         ids = await self.tmrepo.get_students(team_id)
         members = []
-        for id in ids:
+        for index,id in enumerate(ids):
             student = await self.sturepo.get_details(id["student_id"])
-            members.append(TeamMemberDetails(roll=student["roll"],name=student["name"],team_lead=False)) # have to change this.
+            members.append(TeamMemberDetails(roll=student["roll"],name=student["name"],team_lead=(index==0))) # have to change this.
         return TeamDetails(team=team_details,supervisor=faculty_details,members=members)
     async def get_team_submissions(self,faculty_id: int,team_id: str):
         if not await self.projrepo.verify_team(team_id, faculty_id):

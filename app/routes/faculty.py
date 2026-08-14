@@ -37,7 +37,7 @@ async def changes_required(team_id:str,submission_id:int,req:RemarkRequest,notif
     return f"Requested Team : {team_id} For ReSubmission."
 @router.post("/teams/{team_id}/submissions/{submission_id}/approve",response_model=str)
 async def approve_submission(team_id:str,submission_id:int,notification_service:NotificationService=Depends(get_notification_service),service : SubmissionService = Depends(get_submission_service),faculty = Depends(get_current_faculty)):
-    await service.add_approved(submission_id,faculty["id"])
+    await service.add_approved(submission_id)
     await notification_service.approved(faculty["id"],"Approved Submission",team_id)
     return f"Approved Submission."
 @router.get("/dashboard")
