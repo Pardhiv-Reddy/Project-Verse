@@ -3,7 +3,7 @@ class SubmissionRepo:
     def __init__(self,conn:Connection):
         self.conn = conn
     async def add_submission(self,team_id:str,requirement_id:int,document_name:str,document_path:str,version:int):
-        await self.conn.execute("insert into submissions(team_id,requirement_id,document_name,document_path,version,status) values ($1,$2,$3,$4,$5,$6,'APPROVED')",team_id,requirement_id,document_name,document_path,version)
+        await self.conn.execute("insert into submissions(team_id,requirement_id,document_name,document_path,version) values ($1,$2,$3,$4,$5)",team_id,requirement_id,document_name,document_path,version)
     async def view_submissions(self,team_id:str):
         res = await self.conn.fetch("select document_name,document_path from submissions where team_id = $1",team_id)
         if not res:
