@@ -1,21 +1,22 @@
 from github import Auth
 from github import Github
-from settings import Settings
+from ..settings import Settings
 from urllib.parse import urlparse
 from datetime import datetime,timezone
 from github.GithubException import UnknownObjectException
-from models.github import Commit
-from models.github import Contributor
-from models.github import Issue
-from models.github import PullRequest
-from models.github import Repository
-from models.github import Snapshot
-from models.github import Analytics
+from app.DB.repositories.projectgithubrepo import ProjectRepositoryRepo
+from ..models.github import Commit
+from ..models.github import Contributor
+from ..models.github import Issue
+from ..models.github import PullRequest
+from ..models.github import Repository
+from ..models.github import Snapshot
 setting = Settings()
 class GitHubService:
-    def __init__(self):
+    def __init__(self,github_repo:ProjectRepositoryRepo):
         auth = Auth.Token(setting.github_token)
         self.client = Github(auth=auth,per_page=100)
+        self.github_repo = github_repo
 
     def extract_owner_repo(self,repo_url: str) -> tuple[str, str]:
         parsed = urlparse(repo_url)
@@ -40,11 +41,10 @@ class GitHubService:
         return owner, repo_name
     
 
-    def get_repository(self, repo_url: str):
-        owner, repo_name = self.extract_owner_repo(repo_url)
-
+    def get_repository(self,team_id:str,repo_url: str):
+        details = self.github_repo.get_owner_repo_name(team_id)
         try:    
-            return self.client.get_repo(f"{owner}/{repo_name}")
+            return self.client.get_repo(f"{details['repository_owner']}/{details['repository_name']}")
         except UnknownObjectException:
             raise ValueError(f"Repository not found: {repo_url}")
 

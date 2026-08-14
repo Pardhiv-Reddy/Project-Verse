@@ -2,7 +2,7 @@ from fastapi import APIRouter,Depends,UploadFile,File
 from app.auth.permissions import get_team_lead,get_current_student
 from app.DB.dependencies import get_submission_service,get_github_service,get_student_dashboard_service,get_project_workspace_dashboard_service,get_notification_service
 from app.services.SubmissionService import SubmissionService
-from app.services.GitHubService import GitHubRepositoryService
+from app.services.GitHubRepositoryService import GitHubRepositoryService
 from app.services.StudentDashbordService import StudentDashboardService
 from app.services.ProjectWorkService import ProjectWorkSpaceService
 from app.services.NotificationService import NotificationService

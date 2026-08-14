@@ -18,7 +18,7 @@ from app.services.NotificationService import NotificationService
 from app.services.AuthService import AuthService
 from app.services.SubmissionService import SubmissionService 
 from app.services.FileService import FileService
-from app.services.GitHubService import GitHubRepositoryService
+from app.services.GitHubRepositoryService import GitHubRepositoryService
 from app.services.FacultyDashboardService import FacultyDashboardService
 from app.services.StudentDashbordService import StudentDashboardService
 from app.services.ProjectWorkService import ProjectWorkSpaceService
